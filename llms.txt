@@ -1,0 +1,17 @@
+# FamFirst Clinic Bandar Rimbayu
+
+FamFirst Clinic is a private medical clinic at No 6-G, Jalan Flora 1/3, Bandar Rimbayu, 42500 Telok Panglima Garang, Selangor, Malaysia.
+
+Primary phone: +603-5525 8837
+Website preview: https://shukritobi.github.io/famfirst-clinic-rimbayu/
+
+## Focused patient pathways
+- Doctor-guided weight management: /services/weight-management.html
+- Skin tag and benign lesion assessment: /services/skin-tag-removal.html
+- Skin health and facial consultation: /services/skin-health-facials.html
+
+## Established clinic services
+General medical consultation, medical screening, women’s health, vaccination, wound care and ultrasound are listed on the clinic's existing public website.
+
+## Important limitations
+All treatments, procedures, medicines and supplements require assessment by a registered medical practitioner. Treatment results vary. Proposed aesthetic services must be confirmed against the clinic's CKAPS registration, practitioner credentials and Medicine Advertisements Board requirements before public launch.
