@@ -1,0 +1,9 @@
+{
+  "name": "FamFirst Clinic Bandar Rimbayu",
+  "short_name": "FamFirst",
+  "start_url": "./",
+  "display": "standalone",
+  "background_color": "#ffffff",
+  "theme_color": "#0b6f69",
+  "icons": []
+}
