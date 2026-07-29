@@ -1,0 +1,5 @@
+User-agent: *
+Allow: /
+Disallow: /dashboard.html
+Disallow: /checkout.html
+Sitemap: https://shukritobi.github.io/famfirst-clinic-rimbayu/sitemap.xml
