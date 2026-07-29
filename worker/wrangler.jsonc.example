@@ -11,9 +11,6 @@
     "BILLPLZ_BASE_URL": "https://www.billplz-sandbox.com/api/v3",
     "ALLOWED_ORIGIN": "https://shukritobi.github.io"
   },
-  "secrets": {
-    "required": ["BILLPLZ_API_KEY", "BILLPLZ_COLLECTION_ID", "BILLPLZ_XSIGNATURE_KEY", "DASHBOARD_TOKEN"]
-  },
   "d1_databases": [
     {
       "binding": "DB",
