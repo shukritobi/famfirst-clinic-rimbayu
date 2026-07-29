@@ -1,0 +1,24 @@
+{
+  "$schema": "node_modules/wrangler/config-schema.json",
+  "name": "famfirst-clinic-api",
+  "main": "src/index.js",
+  "compatibility_date": "2026-07-30",
+  "compatibility_flags": ["nodejs_compat"],
+  "observability": { "enabled": true, "head_sampling_rate": 1 },
+  "vars": {
+    "PUBLIC_SITE_URL": "https://shukritobi.github.io/famfirst-clinic-rimbayu",
+    "PUBLIC_API_URL": "https://famfirst-clinic-api.YOUR-SUBDOMAIN.workers.dev",
+    "BILLPLZ_BASE_URL": "https://www.billplz-sandbox.com/api/v3",
+    "ALLOWED_ORIGIN": "https://shukritobi.github.io"
+  },
+  "secrets": {
+    "required": ["BILLPLZ_API_KEY", "BILLPLZ_COLLECTION_ID", "BILLPLZ_XSIGNATURE_KEY", "DASHBOARD_TOKEN"]
+  },
+  "d1_databases": [
+    {
+      "binding": "DB",
+      "database_name": "famfirst-clinic-db",
+      "database_id": "REPLACE_WITH_D1_DATABASE_ID"
+    }
+  ]
+}
