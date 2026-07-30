@@ -1,0 +1,175 @@
+name: Apply parallax clinic hero
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - .github/workflows/apply-parallax-hero.yml
+  workflow_dispatch:
+
+permissions:
+  contents: write
+  pages: write
+  id-token: write
+
+concurrency:
+  group: pages
+  cancel-in-progress: true
+
+jobs:
+  apply-and-deploy:
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v6
+        with:
+          fetch-depth: 0
+
+      - name: Rebuild optimized clinic assets
+        shell: bash
+        run: |
+          mkdir -p assets/images
+          cat .build-assets/hero1.txt .build-assets/hero-rest.txt | tr -d '\n\r ' | base64 -d > assets/images/hero-waiting.webp
+          tr -d '\n\r ' < .build-assets/logo-all.txt | base64 -d > assets/images/logo-clean.webp
+
+      - name: Apply tested parallax hero
+        shell: bash
+        run: |
+          python <<'PY'
+          from pathlib import Path
+          import re
+
+          root = Path('.')
+          index = root / 'index.html'
+          text = index.read_text()
+
+          old_styles = '<link rel="stylesheet" href="assets/styles.css"><link rel="stylesheet" href="assets/brand-base.css"><link rel="stylesheet" href="assets/brand-hero.css"><link rel="stylesheet" href="assets/brand-reception.css"><link rel="stylesheet" href="assets/brand-seating.css"><link rel="stylesheet" href="assets/mobile-fixes.css">'
+          new_styles = '<link rel="stylesheet" href="assets/styles.css"><link rel="stylesheet" href="assets/brand-base.css"><link rel="stylesheet" href="assets/brand-hero.css"><link rel="stylesheet" href="assets/mobile-fixes.css"><link rel="stylesheet" href="assets/hero-parallax.css">'
+          if old_styles in text:
+              text = text.replace(old_styles, new_styles, 1)
+          elif 'assets/hero-parallax.css' not in text:
+              text = text.replace('<link rel="stylesheet" href="assets/mobile-fixes.css">', '<link rel="stylesheet" href="assets/mobile-fixes.css"><link rel="stylesheet" href="assets/hero-parallax.css">', 1)
+
+          hero_pattern = re.compile(
+              r'  <section class="hero">.*?  </section>\n\n  <section class="section" id="services">',
+              re.S,
+          )
+          hero = '''  <section class="hero hero-parallax">
+            <div class="container hero-parallax-inner">
+              <div class="hero-copy">
+                <span class="eyebrow">Doctor-led care, close to home</span>
+                <h1>Healthier weight. Clearer skin. <span>Family‑first care.</span></h1>
+                <p class="lead">A focused medical clinic experience for Bandar Rimbayu families, with doctor-guided weight management, skin tag assessment, skin health consultations, women’s health and everyday medical care.</p>
+                <div class="hero-actions">
+                  <a class="btn btn-accent" href="#appointment">Request appointment</a>
+                  <a class="btn btn-outline" href="services/weight-management.html">Explore weight management</a>
+                </div>
+                <div class="trust-row">
+                  <span class="trust-item"><span class="trust-dot">✓</span> Registered medical care</span>
+                  <span class="trust-item"><span class="trust-dot">✓</span> Assessment before treatment</span>
+                  <span class="trust-item"><span class="trust-dot">✓</span> Bandar Rimbayu location</span>
+                </div>
+              </div>
+            </div>
+            <div class="container quick-strip">
+              <div class="quick-grid">
+                <div class="quick-item"><small>Address</small><strong>No 6-G, Jalan Flora 1/3</strong></div>
+                <div class="quick-item"><small>Weekdays</small><strong>9:00 AM - 10:00 PM</strong></div>
+                <div class="quick-item"><small>Weekend</small><strong>10:00 AM - 6:00 PM</strong></div>
+                <div class="quick-item"><small>Call</small><strong>018-580 2945</strong></div>
+              </div>
+            </div>
+          </section>
+
+          <section class="section" id="services">'''
+          text, count = hero_pattern.subn(hero, text, count=1)
+          if count != 1 and 'hero hero-parallax' not in text:
+              raise SystemExit('Could not replace homepage hero')
+          index.write_text(text)
+
+          css = '''/* Homepage parallax hero and circular logo refinements */
+          .hero.hero-parallax{
+            position:relative;min-height:720px;display:flex;flex-direction:column;justify-content:center;
+            overflow:hidden;padding:92px 0 46px;
+            background-image:
+              linear-gradient(90deg,rgba(8,47,56,.78) 0%,rgba(8,47,56,.58) 44%,rgba(8,47,56,.18) 74%,rgba(8,47,56,.08) 100%),
+              url("images/hero-waiting.webp");
+            background-size:cover;background-position:center 48%;background-repeat:no-repeat;background-attachment:fixed
+          }
+          .hero.hero-parallax::before{
+            content:"";position:absolute;inset:0;
+            background:linear-gradient(180deg,rgba(0,0,0,.04),rgba(0,0,0,.16)),
+              radial-gradient(circle at 20% 35%,rgba(31,167,198,.18),transparent 42%);
+            pointer-events:none
+          }
+          .hero-parallax-inner{position:relative;z-index:2;display:flex;align-items:center;min-height:540px}
+          .hero-parallax .hero-copy{
+            width:min(690px,100%);padding:38px;border-radius:32px;background:rgba(255,255,255,.92);
+            border:1px solid rgba(255,255,255,.62);box-shadow:0 26px 70px rgba(5,42,50,.24);
+            backdrop-filter:blur(16px);-webkit-backdrop-filter:blur(16px)
+          }
+          .hero-parallax .hero-copy h1{font-size:clamp(2.75rem,5.3vw,5rem)}
+          .hero-parallax .hero-copy .lead{color:#526e77}
+          .hero-parallax .quick-strip{position:relative;z-index:3;transform:translateY(28px)}
+          .hero-parallax .quick-grid{background:rgba(255,255,255,.96);backdrop-filter:blur(16px);-webkit-backdrop-filter:blur(16px)}
+          @media(max-width:980px){
+            .hero.hero-parallax{min-height:700px;background-attachment:scroll;background-position:58% center;padding-top:70px}
+            .hero-parallax-inner{min-height:520px;align-items:flex-end}
+            .hero-parallax .hero-copy{width:min(650px,100%)}
+          }
+          @media(max-width:680px){
+            .hero.hero-parallax{
+              min-height:690px;padding:42px 0 36px;background-position:62% center;
+              background-image:linear-gradient(180deg,rgba(8,47,56,.14) 0%,rgba(8,47,56,.36) 45%,rgba(8,47,56,.72) 100%),url("images/hero-waiting.webp")
+            }
+            .hero-parallax-inner{min-height:520px;align-items:flex-end}
+            .hero-parallax .hero-copy{padding:24px;border-radius:24px;background:rgba(255,255,255,.94)}
+            .hero-parallax .hero-copy h1{font-size:clamp(2.15rem,9.6vw,3.1rem);line-height:1.04}
+            .hero-parallax .hero-actions{display:grid;grid-template-columns:1fr}
+            .hero-parallax .hero-actions .btn{width:100%}
+            .hero-parallax .trust-row{gap:12px;margin-top:24px}
+            .hero-parallax .quick-strip{transform:translateY(20px)}
+          }
+          @media(prefers-reduced-motion:reduce){.hero.hero-parallax{background-attachment:scroll}}
+          '''
+          (root / 'assets/hero-parallax.css').write_text(css)
+
+          brand = root / 'assets/brand-base.css'
+          brand_css = brand.read_text()
+          marker = '/* Clean circular logo asset */'
+          if marker not in brand_css:
+              brand_css += '''\n\n/* Clean circular logo asset */
+              .brand-mark{
+                width:56px;height:56px;aspect-ratio:1/1;flex:0 0 56px;border-radius:50%;overflow:hidden;
+                background-color:#fff;background-image:url("images/logo-clean.webp");background-position:center;
+                background-size:100% 100%;background-repeat:no-repeat;border:1px solid rgba(31,167,198,.18);
+                box-shadow:0 10px 24px rgba(31,167,198,.16);color:transparent;font-size:0
+              }
+              @media(max-width:680px){.brand-mark{width:48px;height:48px;flex-basis:48px}}
+              '''
+              brand.write_text(brand_css)
+          PY
+
+      - name: Commit homepage redesign
+        shell: bash
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add index.html assets/brand-base.css assets/hero-parallax.css assets/images/hero-waiting.webp assets/images/logo-clean.webp
+          git commit -m "Rebuild homepage with parallax clinic hero" || true
+          git push
+
+      - name: Configure Pages
+        uses: actions/configure-pages@v5
+
+      - name: Upload site
+        uses: actions/upload-pages-artifact@v4
+        with:
+          path: .
+
+      - name: Deploy
+        id: deployment
+        uses: actions/deploy-pages@v4
