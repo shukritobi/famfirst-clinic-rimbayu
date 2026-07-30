@@ -1,6 +1,6 @@
 const FAMFIRST = {
   apiBase: document.querySelector('meta[name="famfirst-api"]')?.content?.trim() || '',
-  whatsapp: '601112540046',
+  whatsapp: '60185802945',
   clinicName: 'FamFirst Clinic Bandar Rimbayu'
 };
 
@@ -76,7 +76,7 @@ async function submitLead(event) {
     `Preferred date: ${data.date || '-'}`,
     `Notes: ${data.notes || '-'}`
   ].join('\n');
-  showStatus(form, 'Demo request saved. WhatsApp is opening so the clinic can confirm your appointment.');
+  showStatus(form, 'WhatsApp is opening with your appointment details. Send the message to complete your request.');
   window.open(`https://wa.me/${FAMFIRST.whatsapp}?text=${encodeURIComponent(text)}`, '_blank', 'noopener');
   form.reset();
 }

@@ -1,0 +1,29 @@
+/* Homepage UX and mobile layout refinements */
+.nav-actions .btn-primary{white-space:nowrap;flex:0 0 auto}
+.approach-layout{max-width:1040px}
+.approach-layout .section-head{margin-bottom:30px}
+.journey-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:18px}
+.journey-card{display:flex;gap:14px;align-items:flex-start;padding:24px;border:1px solid var(--line);border-radius:22px;background:rgba(255,255,255,.92);box-shadow:0 8px 26px rgba(24,92,109,.05)}
+.journey-card i{flex:0 0 28px;width:28px;height:28px;display:grid;place-items:center;border-radius:50%;background:var(--brand-pale);color:var(--brand-deep);font-style:normal;font-weight:900}
+.journey-card strong{display:block;margin-bottom:5px;font-size:1.05rem}
+.journey-card p{color:var(--ink-soft)}
+.appointment-points{display:flex;flex-wrap:wrap;gap:10px 16px;margin-top:22px;color:var(--brand-deep);font-size:.9rem;font-weight:800}
+@media(max-width:680px){
+  .nav-wrap{gap:8px}
+  .brand{gap:8px;min-width:0}
+  .brand-copy{font-size:.92rem}
+  .brand-copy small{font-size:.58rem;letter-spacing:.04em}
+  .nav-actions{gap:4px}
+  .nav-actions .btn-primary{min-height:42px;padding-inline:14px;font-size:.82rem}
+  .menu-btn{padding:6px;font-size:1.45rem}
+  .journey-grid{grid-template-columns:1fr}
+  .journey-card{padding:20px}
+  .appointment-points{display:grid;gap:8px}
+  .clinic-showcase{display:block;min-height:0}
+  .hero-visual{min-height:0}
+  .photo-card.main{position:relative;inset:auto;width:100%;height:360px;border-radius:24px}
+  .photo-card-caption{left:14px;right:14px;bottom:14px;padding:14px}
+  .photo-card-caption strong{font-size:.94rem;line-height:1.35}
+  .photo-card.sub,.clinic-showcase .float-card{display:none}
+}
+@media(max-width:430px){.photo-card.main{height:310px}}
