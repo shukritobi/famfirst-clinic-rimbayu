@@ -1,0 +1,168 @@
+name: Apply homepage mobile fixes
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - .github/workflows/homepage-mobile-fix.yml
+  workflow_dispatch:
+
+permissions:
+  contents: write
+  pages: write
+  id-token: write
+
+concurrency:
+  group: pages
+  cancel-in-progress: true
+
+jobs:
+  fix-and-deploy:
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v6
+        with:
+          fetch-depth: 0
+
+      - name: Apply content, mobile layout and contact fixes
+        shell: bash
+        run: |
+          python <<'PY'
+          from pathlib import Path
+          import re
+
+          root = Path('.')
+          index = root / 'index.html'
+          text = index.read_text()
+
+          # Shorter, one-line booking CTA and verified mobile contact.
+          text = text.replace('>Book and pay</a>', '>Book now</a>')
+          text = text.replace('href="tel:+60355258837"', 'href="tel:+60185802945"')
+          text = text.replace('03-5525 8837', '018-580 2945')
+          text = text.replace('https://wa.me/601112540046', 'https://wa.me/60185802945')
+          text = text.replace('"telephone": "+60355258837"', '"telephone": "+60185802945"')
+
+          # Remove the internal SEO growth-plan panel and replace it with patient-facing journey cards.
+          approach_pattern = re.compile(
+              r'  <section class="section bg-cream" id="approach">.*?  </section>\n\n  <section class="section">',
+              re.S,
+          )
+          approach_replacement = '''  <section class="section bg-cream" id="approach">
+            <div class="container approach-layout">
+              <div class="section-head">
+                <span class="eyebrow">A better clinic journey</span>
+                <h2>Built around clear, comfortable decisions</h2>
+                <p class="lead">From your first question to follow-up care, FamFirst keeps each step simple and explains your options before treatment begins.</p>
+              </div>
+              <div class="journey-grid">
+                <div class="journey-card"><i>✓</i><div><strong>Assessment before treatment</strong><p>Weight, skin and facial concerns can have different causes, so the doctor assesses your needs first.</p></div></div>
+                <div class="journey-card"><i>✓</i><div><strong>Clear treatment options</strong><p>Understand what is suitable, what to expect and whether follow-up care is needed.</p></div></div>
+                <div class="journey-card"><i>✓</i><div><strong>Easy appointment request</strong><p>Choose a service and preferred date, then send your request directly through WhatsApp.</p></div></div>
+                <div class="journey-card"><i>✓</i><div><strong>Helpful preparation</strong><p>The clinic can tell you what to bring or prepare before your appointment.</p></div></div>
+              </div>
+            </div>
+          </section>
+
+          <section class="section">'''
+          text, count = approach_pattern.subn(approach_replacement, text, count=1)
+          if count != 1:
+              raise SystemExit('Could not replace approach section')
+
+          # Improve appointment instructions and remove prototype disclaimer.
+          text = text.replace(
+              '<p class="lead" style="margin-top:16px">Submit the form and continue through WhatsApp. The clinic will confirm availability, suitability and the final fee.</p>\n        <div class="notice" style="margin-top:24px">This preview does not diagnose conditions or guarantee treatment outcomes. All procedures and supplements require a doctor’s assessment.</div>',
+              '<p class="lead" style="margin-top:16px">Choose the service you are interested in and your preferred date. We’ll prepare a WhatsApp message with your details, then the clinic team will confirm the available time and consultation fee.</p>\n        <div class="appointment-points"><span>✓ No account required</span><span>✓ Takes about one minute</span><span>✓ Confirmation by clinic staff</span></div>',
+          )
+          text = text.replace('>WhatsApp clinic</a>', '>WhatsApp us</a>')
+          text = text.replace(
+              '<a class="btn btn-outline" href="tel:+60185802945">018-580 2945</a>',
+              '<a class="btn btn-outline" href="tel:+60185802945">Call 018-580 2945</a>',
+          )
+
+          # Load the final responsive overrides last.
+          stylesheet = '<link rel="stylesheet" href="assets/mobile-fixes.css">'
+          if stylesheet not in text:
+              text = text.replace(
+                  '<link rel="stylesheet" href="assets/brand-seating.css">',
+                  '<link rel="stylesheet" href="assets/brand-seating.css">' + stylesheet,
+              )
+          index.write_text(text)
+
+          # Ensure every live page uses the mobile WhatsApp contact and shorter menu wording.
+          html_files = [root / 'checkout.html', root / 'privacy.html', root / '404.html']
+          html_files += sorted((root / 'services').glob('*.html'))
+          for path in html_files:
+              page = path.read_text()
+              page = page.replace('Book and pay', 'Book now').replace('Book and Pay', 'Book now')
+              page = page.replace('601112540046', '60185802945')
+              page = page.replace('+60355258837', '+60185802945')
+              page = page.replace('03-5525 8837', '018-580 2945')
+              path.write_text(page)
+
+          # Update the form WhatsApp target and fallback message.
+          app = root / 'assets/app.js'
+          js = app.read_text()
+          js = js.replace("whatsapp: '601112540046'", "whatsapp: '60185802945'")
+          js = js.replace(
+              "showStatus(form, 'Demo request saved. WhatsApp is opening so the clinic can confirm your appointment.');",
+              "showStatus(form, 'WhatsApp is opening with your appointment details. Send the message to complete your request.');",
+          )
+          app.write_text(js)
+
+          # Responsive overrides: no wrapped header CTA and no overlapping hero cards on mobile.
+          (root / 'assets/mobile-fixes.css').write_text('''/* Homepage UX and mobile layout refinements */
+          .nav-actions .btn-primary{white-space:nowrap;flex:0 0 auto}
+          .approach-layout{max-width:1040px}
+          .approach-layout .section-head{margin-bottom:30px}
+          .journey-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:18px}
+          .journey-card{display:flex;gap:14px;align-items:flex-start;padding:24px;border:1px solid var(--line);border-radius:22px;background:rgba(255,255,255,.92);box-shadow:0 8px 26px rgba(24,92,109,.05)}
+          .journey-card i{flex:0 0 28px;width:28px;height:28px;display:grid;place-items:center;border-radius:50%;background:var(--brand-pale);color:var(--brand-deep);font-style:normal;font-weight:900}
+          .journey-card strong{display:block;margin-bottom:5px;font-size:1.05rem}
+          .journey-card p{color:var(--ink-soft)}
+          .appointment-points{display:flex;flex-wrap:wrap;gap:10px 16px;margin-top:22px;color:var(--brand-deep);font-size:.9rem;font-weight:800}
+          @media(max-width:680px){
+            .nav-wrap{gap:8px}
+            .brand{gap:8px;min-width:0}
+            .brand-copy{font-size:.92rem}
+            .brand-copy small{font-size:.58rem;letter-spacing:.04em}
+            .nav-actions{gap:4px}
+            .nav-actions .btn-primary{min-height:42px;padding-inline:14px;font-size:.82rem}
+            .menu-btn{padding:6px;font-size:1.45rem}
+            .journey-grid{grid-template-columns:1fr}
+            .journey-card{padding:20px}
+            .appointment-points{display:grid;gap:8px}
+            .clinic-showcase{display:block;min-height:0}
+            .hero-visual{min-height:0}
+            .photo-card.main{position:relative;inset:auto;width:100%;height:360px;border-radius:24px}
+            .photo-card-caption{left:14px;right:14px;bottom:14px;padding:14px}
+            .photo-card-caption strong{font-size:.94rem;line-height:1.35}
+            .photo-card.sub,.clinic-showcase .float-card{display:none}
+          }
+          @media(max-width:430px){.photo-card.main{height:310px}}
+          ''')
+          PY
+
+      - name: Commit fixes
+        shell: bash
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add index.html checkout.html privacy.html 404.html services assets/app.js assets/mobile-fixes.css
+          git commit -m "Fix homepage mobile layout and appointment UX" || exit 0
+          git push
+
+      - name: Configure Pages
+        uses: actions/configure-pages@v5
+
+      - name: Upload site
+        uses: actions/upload-pages-artifact@v4
+        with:
+          path: .
+
+      - name: Deploy
+        id: deployment
+        uses: actions/deploy-pages@v4
