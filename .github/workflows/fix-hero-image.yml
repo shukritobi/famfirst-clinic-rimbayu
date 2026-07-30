@@ -1,0 +1,88 @@
+name: Apply permanent hero image fix
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - .github/workflows/fix-hero-image.yml
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  fix-hero:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v6
+        with:
+          fetch-depth: 0
+
+      - name: Create real hero image and remove broken loader
+        shell: bash
+        run: |
+          python <<'PY'
+          from pathlib import Path
+          import base64
+          import re
+
+          root = Path('.')
+          seating_css_path = root / 'assets' / 'brand-seating.css'
+          mobile_css_path = root / 'assets' / 'mobile-fixes.css'
+          app_js_path = root / 'assets' / 'app.js'
+          image_path = root / 'assets' / 'images' / 'hero-waiting.webp'
+
+          seating_css = seating_css_path.read_text(encoding='utf-8')
+          match = re.search(
+              r'--img-seating:url\("data:image/webp;base64,([^"\)]+)"\)',
+              seating_css,
+          )
+          if not match:
+              raise SystemExit('Could not find the verified seating image in brand-seating.css')
+
+          image_bytes = base64.b64decode(match.group(1))
+          if not image_bytes.startswith(b'RIFF') or image_bytes[8:12] != b'WEBP':
+              raise SystemExit('Decoded hero image is not a valid WebP file')
+
+          image_path.parent.mkdir(parents=True, exist_ok=True)
+          image_path.write_bytes(image_bytes)
+
+          css = mobile_css_path.read_text(encoding='utf-8')
+          css = css.replace(
+              'background-image:var(--famfirst-clean-logo,var(--img-logo))!important;',
+              'background-image:var(--img-logo)!important;',
+          )
+          css = css.replace(
+              'var(--famfirst-hero-photo,linear-gradient(135deg,#e8f7fb,#ffffff))',
+              'url("images/hero-waiting.webp")',
+          )
+          mobile_css_path.write_text(css, encoding='utf-8')
+
+          app = app_js_path.read_text(encoding='utf-8')
+          app = app.replace(
+              "const FAMFIRST_SCRIPT_URL = new URL(document.currentScript?.src || 'assets/app.js', window.location.href);\n\n",
+              '',
+          )
+          app = re.sub(
+              r'\nasync function initBrandAssets\(\) \{.*?\n\}\n',
+              '\n',
+              app,
+              count=1,
+              flags=re.S,
+          )
+          app = app.replace('\ninitBrandAssets();', '')
+          app_js_path.write_text(app, encoding='utf-8')
+
+          print(f'Created {image_path} ({len(image_bytes):,} bytes)')
+          PY
+
+      - name: Commit permanent fix
+        shell: bash
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git rm --ignore-unmatch .github/workflows/fix-hero-image.yml
+          git add assets/images/hero-waiting.webp assets/mobile-fixes.css assets/app.js
+          git commit -m "Use real clinic image for homepage hero"
+          git push
