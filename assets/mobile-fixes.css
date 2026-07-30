@@ -1,4 +1,4 @@
-/* Homepage UX and mobile layout refinements */
+/* Homepage UX, parallax hero and mobile layout refinements */
 .nav-actions .btn-primary{white-space:nowrap;flex:0 0 auto}
 .approach-layout{max-width:1040px}
 .approach-layout .section-head{margin-bottom:30px}
@@ -8,9 +8,53 @@
 .journey-card strong{display:block;margin-bottom:5px;font-size:1.05rem}
 .journey-card p{color:var(--ink-soft)}
 .appointment-points{display:flex;flex-wrap:wrap;gap:10px 16px;margin-top:22px;color:var(--brand-deep);font-size:.9rem;font-weight:800}
+
+/* Keep the clinic mark perfectly circular instead of cropping its four edges. */
+.brand-mark{
+  width:56px!important;height:56px!important;aspect-ratio:1/1;flex:0 0 56px;
+  border-radius:50%!important;overflow:hidden;background-color:#fff!important;
+  background-image:var(--famfirst-clean-logo,var(--img-logo))!important;
+  background-position:center!important;background-size:90% 90%!important;background-repeat:no-repeat!important;
+  border:1px solid rgba(31,167,198,.18)!important;box-shadow:0 10px 24px rgba(31,167,198,.16)!important;
+  color:transparent!important;font-size:0!important
+}
+
+/* Use the supplied waiting-area photograph as one clean parallax hero. */
+.hero{
+  position:relative;min-height:720px;display:flex;flex-direction:column;justify-content:center;
+  overflow:hidden;padding:92px 0 46px;
+  background-image:
+    linear-gradient(90deg,rgba(8,47,56,.78) 0%,rgba(8,47,56,.58) 44%,rgba(8,47,56,.18) 74%,rgba(8,47,56,.08) 100%),
+    var(--famfirst-hero-photo,linear-gradient(135deg,#e8f7fb,#ffffff));
+  background-size:cover;background-position:center 48%;background-repeat:no-repeat;background-attachment:fixed
+}
+.hero::before{
+  content:"";position:absolute;inset:0;pointer-events:none;
+  background:linear-gradient(180deg,rgba(0,0,0,.04),rgba(0,0,0,.16)),radial-gradient(circle at 20% 35%,rgba(31,167,198,.18),transparent 42%);
+  mask-image:none
+}
+.hero-grid{position:relative;z-index:2;display:flex!important;align-items:center;min-height:540px}
+.hero-copy{
+  width:min(690px,100%);padding:38px!important;border-radius:32px!important;
+  background:rgba(255,255,255,.92)!important;border:1px solid rgba(255,255,255,.62)!important;
+  box-shadow:0 26px 70px rgba(5,42,50,.24)!important;
+  backdrop-filter:blur(16px);-webkit-backdrop-filter:blur(16px)
+}
+.hero-copy h1{font-size:clamp(2.75rem,5.3vw,5rem)}
+.hero-copy .lead{color:#526e77}
+.hero-visual{display:none!important}
+.hero .quick-strip{position:relative;z-index:3;transform:translateY(28px)}
+.hero .quick-grid{background:rgba(255,255,255,.96);backdrop-filter:blur(16px);-webkit-backdrop-filter:blur(16px)}
+
+@media(max-width:980px){
+  .hero{min-height:700px;background-attachment:scroll;background-position:58% center;padding-top:70px}
+  .hero-grid{min-height:520px;align-items:flex-end}
+  .hero-copy{width:min(650px,100%)}
+}
 @media(max-width:680px){
   .nav-wrap{gap:8px}
   .brand{gap:8px;min-width:0}
+  .brand-mark{width:48px!important;height:48px!important;flex-basis:48px;background-size:90% 90%!important}
   .brand-copy{font-size:.92rem}
   .brand-copy small{font-size:.58rem;letter-spacing:.04em}
   .nav-actions{gap:4px}
@@ -19,11 +63,16 @@
   .journey-grid{grid-template-columns:1fr}
   .journey-card{padding:20px}
   .appointment-points{display:grid;gap:8px}
-  .clinic-showcase{display:block;min-height:0}
-  .hero-visual{min-height:0}
-  .photo-card.main{position:relative;inset:auto;width:100%;height:360px;border-radius:24px}
-  .photo-card-caption{left:14px;right:14px;bottom:14px;padding:14px}
-  .photo-card-caption strong{font-size:.94rem;line-height:1.35}
-  .photo-card.sub,.clinic-showcase .float-card{display:none}
+  .hero{
+    min-height:690px;padding:42px 0 36px;background-position:62% center;
+    background-image:linear-gradient(180deg,rgba(8,47,56,.14) 0%,rgba(8,47,56,.36) 45%,rgba(8,47,56,.72) 100%),var(--famfirst-hero-photo,linear-gradient(135deg,#e8f7fb,#ffffff))
+  }
+  .hero-grid{min-height:520px;align-items:flex-end}
+  .hero-copy{padding:24px!important;border-radius:24px!important;background:rgba(255,255,255,.94)!important}
+  .hero-copy h1{font-size:clamp(2.15rem,9.6vw,3.1rem);line-height:1.04}
+  .hero-actions{display:grid;grid-template-columns:1fr}
+  .hero-actions .btn{width:100%}
+  .trust-row{gap:12px;margin-top:24px}
+  .hero .quick-strip{transform:translateY(20px)}
 }
-@media(max-width:430px){.photo-card.main{height:310px}}
+@media(prefers-reduced-motion:reduce){.hero{background-attachment:scroll}}
