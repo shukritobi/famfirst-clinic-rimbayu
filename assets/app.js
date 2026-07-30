@@ -4,35 +4,8 @@ const FAMFIRST = {
   clinicName: 'FamFirst Clinic Bandar Rimbayu'
 };
 
-const FAMFIRST_SCRIPT_URL = new URL(document.currentScript?.src || 'assets/app.js', window.location.href);
-
 const money = (value) => new Intl.NumberFormat('en-MY', { style: 'currency', currency: 'MYR' }).format(value);
 
-async function initBrandAssets() {
-  const root = document.documentElement;
-  const siteRoot = new URL('../', FAMFIRST_SCRIPT_URL);
-  try {
-    const [heroA, heroB, logo] = await Promise.all([
-      fetch(new URL('.build-assets/hero1.txt', siteRoot)).then((response) => {
-        if (!response.ok) throw new Error('Hero asset unavailable');
-        return response.text();
-      }),
-      fetch(new URL('.build-assets/hero-rest.txt', siteRoot)).then((response) => {
-        if (!response.ok) throw new Error('Hero asset unavailable');
-        return response.text();
-      }),
-      fetch(new URL('.build-assets/logo-all.txt', siteRoot)).then((response) => {
-        if (!response.ok) throw new Error('Logo asset unavailable');
-        return response.text();
-      })
-    ]);
-    const clean = (value) => value.replace(/\s+/g, '');
-    root.style.setProperty('--famfirst-hero-photo', `url("data:image/webp;base64,${clean(heroA + heroB)}")`);
-    root.style.setProperty('--famfirst-clean-logo', `url("data:image/webp;base64,${clean(logo)}")`);
-  } catch (error) {
-    console.warn('FamFirst visual assets could not be loaded.', error);
-  }
-}
 
 function initMenu() {
   const button = document.querySelector('[data-menu]');
@@ -243,7 +216,6 @@ function updateYear() {
   document.querySelectorAll('[data-year]').forEach((node) => { node.textContent = new Date().getFullYear(); });
 }
 
-initBrandAssets();
 initMenu();
 initFaq();
 initForms();

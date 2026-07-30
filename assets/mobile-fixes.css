@@ -13,7 +13,7 @@
 .brand-mark{
   width:56px!important;height:56px!important;aspect-ratio:1/1;flex:0 0 56px;
   border-radius:50%!important;overflow:hidden;background-color:#fff!important;
-  background-image:var(--famfirst-clean-logo,var(--img-logo))!important;
+  background-image:var(--img-logo)!important;
   background-position:center!important;background-size:90% 90%!important;background-repeat:no-repeat!important;
   border:1px solid rgba(31,167,198,.18)!important;box-shadow:0 10px 24px rgba(31,167,198,.16)!important;
   color:transparent!important;font-size:0!important
@@ -25,7 +25,7 @@
   overflow:hidden;padding:92px 0 46px;
   background-image:
     linear-gradient(90deg,rgba(8,47,56,.78) 0%,rgba(8,47,56,.58) 44%,rgba(8,47,56,.18) 74%,rgba(8,47,56,.08) 100%),
-    var(--famfirst-hero-photo,linear-gradient(135deg,#e8f7fb,#ffffff));
+    url("images/hero-waiting.webp");
   background-size:cover;background-position:center 48%;background-repeat:no-repeat;background-attachment:fixed
 }
 .hero::before{
@@ -65,7 +65,7 @@
   .appointment-points{display:grid;gap:8px}
   .hero{
     min-height:690px;padding:42px 0 36px;background-position:62% center;
-    background-image:linear-gradient(180deg,rgba(8,47,56,.14) 0%,rgba(8,47,56,.36) 45%,rgba(8,47,56,.72) 100%),var(--famfirst-hero-photo,linear-gradient(135deg,#e8f7fb,#ffffff))
+    background-image:linear-gradient(180deg,rgba(8,47,56,.14) 0%,rgba(8,47,56,.36) 45%,rgba(8,47,56,.72) 100%),url("images/hero-waiting.webp")
   }
   .hero-grid{min-height:520px;align-items:flex-end}
   .hero-copy{padding:24px!important;border-radius:24px!important;background:rgba(255,255,255,.94)!important}
